@@ -733,7 +733,10 @@ class Game(gym.Env):
             #  episode limit reached
             self.game_finished = True
             self.episode_limit_reached = True
-            self.alice_stopped_state = deepcopy(self.current_level)
+
+            pname = self.current_player_name.upper()
+            if (pname == "ALICE"):
+                self.alice_stopped_state = deepcopy(self.current_level)
         
 
         #  hack return
