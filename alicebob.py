@@ -288,6 +288,14 @@ class Game(gym.Env):
 
         self.elapsed_time_step = 0
         self.episode_limit_reached = False
+        self.game_finished = False
+        pname = self.current_player_name.upper()
+        if (pname == "ALICE"):
+            self.images["C"] = self.alice
+            self.images_night["C"] = self.alice_night
+        elif (pname == "BOB"):
+            self.images["C"] = self.bob
+            self.images_night["C"] = self.bob_night
 
         return ob
         
