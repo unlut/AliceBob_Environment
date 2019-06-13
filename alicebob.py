@@ -25,7 +25,7 @@ import numpy as np
 
 #  openai gym
 import gym
-
+import gym.spaces
 
 class Game(gym.Env):
     def __init__(self, game_window_name="Alicebob"):
@@ -152,6 +152,8 @@ class Game(gym.Env):
         self.display_env = True
         self.current_player_name = ""
         self.obs_type = "PIXEL"
+        self.episode_limit = 0
+        self.episode_limit_reached = False
 
         self._action_set = ["R", "U", "L", "D", "PASS"]
         self.action_space = gym.spaces.Discrete(len(self._action_set))
@@ -206,6 +208,11 @@ class Game(gym.Env):
             if (self.current_level.get_matrix() == self.alice_stopped_state.get_matrix()):
                 done = True
                 info["done_reason"] = "Bob reached the last state of Alice"
+        
+        if (self.episode_limit_reached):
+            done = True
+            info["done_reason_episode_limit"] = "Episode limit {} is reached".format(self.episode_limit)
+
 
         return ob, reward, done, info
     
@@ -234,7 +241,7 @@ class Game(gym.Env):
 
 
     def reset(self, render_env=True, display_env=True, 
-                current_player_name="Alice", obs_type="PIXEL", hard_night=True,
+                current_player_name="Alice", obs_type="PIXEL", episode_limit=25, hard_night=True,
                 map_width=8, map_height=6, split_point=4,
                 prob_light_on=0.5):
         
@@ -242,6 +249,7 @@ class Game(gym.Env):
         self.display_env = display_env
         self.current_player_name = current_player_name
         self.obs_type = obs_type
+        self.episode_limit = episode_limit
 
         self.map_width = map_width
         self.map_height = map_height
@@ -708,6 +716,13 @@ class Game(gym.Env):
             elif (pname == "BOB"):
                 #  bob's pass action does nothing
                 pass
+        
+        #  check if episode limit reached
+        if (self.elapsed_time_step == self.episode_limit):
+            #  episode limit reached
+            self.game_finished = True
+            self.episode_limit_reached = True
+            self.alice_stopped_state = deepcopy(self.current_level)
         
 
         #  hack return
