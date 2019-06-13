@@ -286,6 +286,9 @@ class Game(gym.Env):
         
         ob = self._get_obs()
 
+        self.elapsed_time_step = 0
+        self.episode_limit_reached = False
+
         return ob
         
         
