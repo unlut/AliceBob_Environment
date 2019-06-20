@@ -202,18 +202,23 @@ class Game(gym.Env):
         if (pname == "ALICE"):
             if (self.alice_stopped):
                 self.alice_stopped = False
-                info["done_reason"] = "Alice decided to stop"
+                info["done_reason"] = "Alice decided to stop at timestep {}".format(self.elapsed_time_step)
                 done = True
         elif (pname == "BOB"):
             if (self.current_level.get_matrix() == self.alice_stopped_state.get_matrix()):
                 done = True
-                info["done_reason"] = "Bob reached the last state of Alice"
+                info["done_reason"] = "Bob reached the last state of Alice at timestep {}".format(self.elapsed_time_step)
+                #print("BOB matrix")
+                #print(self.current_level.get_matrix())
+                #print("ALICE matrix")
+                #print(self.alice_stopped_state.get_matrix())
         
         if (self.episode_limit_reached):
             done = True
             info["done_reason_episode_limit"] = "Episode limit {} is reached".format(self.episode_limit)
 
 
+        reward = 0
         return ob, reward, done, info
     
 
@@ -283,19 +288,23 @@ class Game(gym.Env):
                 raise Exception("ALICE MUST PLAY FIRST BEFORE BOB!") 
             self.current_level = self.alice_started_state
             self.init_objects()
-        
-        ob = self._get_obs()
+
 
         self.elapsed_time_step = 0
         self.episode_limit_reached = False
         self.game_finished = False
+        self.alice_stopped = False
+
         pname = self.current_player_name.upper()
         if (pname == "ALICE"):
             self.images["C"] = self.alice
             self.images_night["C"] = self.alice_night
+            self.alice_stopped_state = None
         elif (pname == "BOB"):
             self.images["C"] = self.bob
             self.images_night["C"] = self.bob_night
+
+        ob = self._get_obs()
 
         return ob
         
@@ -733,7 +742,6 @@ class Game(gym.Env):
             #  episode limit reached
             self.game_finished = True
             self.episode_limit_reached = True
-
             pname = self.current_player_name.upper()
             if (pname == "ALICE"):
                 self.alice_stopped_state = deepcopy(self.current_level)
